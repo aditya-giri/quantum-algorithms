@@ -1,4 +1,4 @@
-from qiskit import *
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, Aer, execute
 from qiskit.visualization import plot_histogram as plot_h, plot_bloch_vector as plot_bv, plot_bloch_multivector as plot_bmv
 from math import sqrt, pi
 from qiskit.quantum_info import random_statevector
@@ -23,6 +23,8 @@ def create_circuit():
     
     return [qc, qr, crz, crx]
 
+#plot_bmv(execute(qc, s_backend).result().get_statevector())
+
 def create_bell_state(qc, b1, b2):
     """ Assumes that the starting states are 0 and 0, doesn't work otherwise """
     qc.h(b1)
@@ -41,13 +43,16 @@ def bob_gates(qc, b2, crx, crz):
     qc.x(b2).c_if(crx, 1)
     qc.z(b2).c_if(crz, 1)
 
+def pbv(qc):
+    plot_bmv(execute(qc, s_backend).result().get_statevector())
+
 def main():
     qc, qr, crz, crx = create_circuit()
     psi = qr[0]
     b1 = qr[1]
     b2 = qr[2]
-
-    print("Input statevector: ")
+    qc.draw()
+    print("\n\nInput statevector: ")
     print(execute(qc, s_backend).result().get_statevector())
 
     create_bell_state(qc, b1, b2)
@@ -55,8 +60,12 @@ def main():
     measure_and_send(qc, psi, b1, crx, crz)
     bob_gates(qc, b2, crx, crz)
 
-    print("Output statevector: ")
+    print("\n\nCircuit: ")
+    print(qc)
+
+    print("\n\nOutput statevector: ")
     print(execute(qc, s_backend).result().get_statevector())
+    print("\n\n")
 
 if __name__ == '__main__':
     main()
