@@ -1,2 +1,2 @@
 # quantum-algorithms
-A collection of quantum algorithms and their Qiskit implementations
+Implementations of quantum algorithms in as many languages and frameworks as possible! 
