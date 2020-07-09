@@ -1,0 +1,36 @@
+def QFT[n:!ℕ](ψ: int[n])mfree: int[n]{
+	for k in [0..n div 2){
+		(ψ[k],ψ[n-k-1]) := (ψ[n-k-1],ψ[k]);
+	}
+	for k in [0..n){
+		ψ[k] := H(ψ[k]);
+		for l in [k+1..n){
+			if ψ[l] && ψ[k]{
+				phase(2*π * 2^(k-l-1));
+			}
+		}
+	}
+	return ψ;
+}
+
+def phaseEstimation[k:!ℕ](
+    U:int[k] !->mfree int[k],
+    u:int[k], 
+    precision:!ℕ) {
+
+    ancilla := 0:int[precision];
+    for i in [0..precision) { ancilla[i] := H(ancilla[i]); }
+
+    for i in [0..precision) { 
+        if ancilla[i] {
+            for l in [0..2^i) {
+                u := U(u);
+            }
+        }
+    }
+
+    ancilla := reverse(QFT[precision])(ancilla);
+    result := measure(ancilla);
+    measure(u);
+    return result;
+}
