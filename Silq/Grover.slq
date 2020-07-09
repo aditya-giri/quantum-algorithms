@@ -1,0 +1,38 @@
+def groverDiff[n:!N](cand:uint[n]){
+  for k in [0..n) {
+        cand[k]:= H(cand[k]);
+        cand[k]:= X(cand[k]);
+
+    }
+   if (cand=3){phase(π);}
+   for k in [0..n) {
+        cand[k]:= X(cand[k]);
+        cand[k]:= H(cand[k]);
+
+   }
+   return cand;
+}
+def grover[n:!N](f:const uint[n]!->qfree B){
+    nInteration := 1;
+    cand := 0:uint[n];
+    for k in [0..n) {
+        cand[k]:= H(cand[k]);
+    }
+   // dump();
+    for k in [0..nInteration){
+        if (f(cand)){phase(π);}
+        cand := groverDiff[n](cand);
+    }
+    dump();
+    return measure(cand);
+}
+//Oracle
+def f[n:!N](const cand:uint[n])qfree:B {
+    return cand=2 || cand=3;
+}
+def main(){
+    n := 3:!N;
+    //dump();
+    m := grover[n](f[n]);
+   // dump();
+}
