@@ -1,0 +1,47 @@
+def bitsize(n:!N) lifted {
+    return ceil(log(n + 1)/log(2)) coerce !N;
+}
+def QFT[n:!N] (qs:B^n) mfree:B^n {
+    for i in [0..n) {
+        qs[i] := H(qs[i]);
+
+        for j in [i+1..n) {
+            qs[j] := U1(π/2^(j - i), qs[j]);
+        }
+    }
+
+    return swap_all(qs);
+}
+def swap_all[n:!N] (qs:B^n) mfree:B^n {
+    for i in [0..n div 2) {
+      (qs[i], qs[n-i-1]) := (qs[n-i-1], qs[i]);
+    }
+
+    return qs;
+}
+// Single-qubit rotation about the Z axis.
+def U1 (r:!ℝ, q:B) mfree {
+    if q { phase(r) }
+    return q;
+}
+
+def main(){
+	 make_bits := lambda(n:!N) {
+        q_num := bitsize(n);
+
+        qs := vector(q_num, false):B[];
+        for i in [0..q_num) {
+            qs[i] := H(qs[i]);
+        }
+
+        qs[0] := U1(n * π, qs[0]);
+        for i in [1..q_num) {
+            r := n * π / (i * 2);
+            qs[q_num-i] := U1(r, qs[q_num-i]);
+        }
+
+        return measure(qs);
+    };
+
+    return measure(reverse(QFT[3])(make_bits(5) coerce B^3));
+}

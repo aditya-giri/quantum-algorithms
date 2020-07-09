@@ -1,0 +1,80 @@
+def bitsize(n:!N) lifted {
+    return ceil(log(n + 1)/log(2)) coerce !N;
+}
+
+// Single-qubit rotation about the Z axis.
+def U1 (r:!ℝ, q:B) mfree {
+    if q { phase(r) }
+    return q;
+}
+
+def find_period[size:!N] (n:!N, a:!N, q:B^size) lifted {
+    for i in [0..size) {
+        mod := 0:!N;
+        for j in [1..2^(size - i)) {
+            mod = (mod * a) % n;
+        }
+    }
+
+    return q;
+}
+
+def swap_all[n:!N] (qs:B^n) mfree:B^n {
+    for i in [0..n div 2) {
+      (qs[i], qs[n-i-1]) := (qs[n-i-1], qs[i]);
+    }
+
+    return qs;
+}
+
+def QFT[n:!N] (qs:B^n) mfree:B^n {
+    for i in [0..n) {
+        qs[i] := H(qs[i]);
+
+        for j in [i+1..n) {
+            qs[j] := U1(π/2^(j - i), qs[j]);
+        }
+    }
+
+    return swap_all(qs);
+}
+
+def test_QFT() {
+    make_bits := lambda(n:!N) {
+        q_num := bitsize(n);
+
+        qs := vector(q_num, false):B[];
+        for i in [0..q_num) {
+            qs[i] := H(qs[i]);
+        }
+
+        qs[0] := U1(n * π, qs[0]);
+        for i in [1..q_num) {
+            r := n * π / (i * 2);
+            qs[q_num-i] := U1(r, qs[q_num-i]);
+        }
+
+        return qs;
+    };
+
+    return reverse(QFT[3])(make_bits(5) coerce B^3);
+}
+
+// Shor's Algorithm:
+// https://tsmatz.wordpress.com/2019/06/04/quantum-integer-factorization-by-shor-period-finding-algorithm/
+def shor(n:!N, a:!N) {
+    size := bitsize(n) * 2;
+    q := vector(size, false):B[];
+
+    // |q> -> H -> |q>
+    for i in [0..size) {
+        q[i] := H(q[i]);
+    }
+
+    // |x⟩|0(=y)⟩ -> |x⟩ |a^x mod N⟩
+    return (n, a, q);
+}
+
+def main(){
+    return measure(test_QFT());
+}

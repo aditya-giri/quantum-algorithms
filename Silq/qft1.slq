@@ -1,0 +1,18 @@
+def QFT[n:!N](x: int[n])mfree: int[n]{
+	for k in [0..n div 2){
+		(x[k],x[n-k-1]) := (x[n-k-1],x[k]);
+	} //SWAP
+	for k in [0..n){
+		x[k] := H(x[k]);
+		for l in [k+1..n){
+			if x[l] && x[k]{
+				phase(2*π * 2^(k-l-1));
+			}
+		}
+	} //Superposition using H Gate and applying controlled RZ Gate
+	return x;
+}
+//Missing Method to Check If Correct
+def main(){
+	return QFT(1:int[6]);
+}
